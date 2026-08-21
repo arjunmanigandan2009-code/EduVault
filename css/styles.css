@@ -721,13 +721,21 @@ img, video { max-width: 100%; display: block; }
     gap: 10px;
 }
 
-.logo-icon { font-size: 28px; }
+.logo-icon {
+    width: 28px;
+    height: 28px;
+    stroke: var(--accent);
+    filter: drop-shadow(0 0 6px rgba(255, 199, 44, 0.7)) drop-shadow(0 0 14px rgba(255, 199, 44, 0.4));
+    animation: logoGlow 3s ease-in-out infinite alternate;
+    flex-shrink: 0;
+}
 
 .logo-text {
     font-size: 20px;
     font-weight: 800;
-    color: white;
+    color: var(--accent);
     letter-spacing: -0.5px;
+    text-shadow: 0 0 10px rgba(255, 199, 44, 0.5), 0 0 22px rgba(255, 199, 44, 0.25);
 }
 
 .sidebar-close {
@@ -912,6 +920,29 @@ img, video { max-width: 100%; display: block; }
     font-size: 18px;
     font-weight: 700;
     transition: color 0.5s var(--ease-smooth);
+    color: var(--accent);
+    text-shadow: 0 0 12px rgba(255, 199, 44, 0.6), 0 0 28px rgba(255, 199, 44, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.topbar-logo {
+    width: 22px;
+    height: 22px;
+    stroke: var(--accent);
+    filter: drop-shadow(0 0 6px rgba(255, 199, 44, 0.7)) drop-shadow(0 0 14px rgba(255, 199, 44, 0.4));
+    animation: logoGlow 3s ease-in-out infinite alternate;
+    flex-shrink: 0;
+}
+
+@keyframes logoGlow {
+    0% {
+        filter: drop-shadow(0 0 6px rgba(255, 199, 44, 0.5)) drop-shadow(0 0 14px rgba(255, 199, 44, 0.2));
+    }
+    100% {
+        filter: drop-shadow(0 0 10px rgba(255, 199, 44, 0.9)) drop-shadow(0 0 24px rgba(255, 199, 44, 0.5));
+    }
 }
 
 .topbar-actions {
