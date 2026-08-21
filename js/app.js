@@ -44,7 +44,9 @@ document.addEventListener('DOMContentLoaded', function() {
 // ===== Theme =====
 function initTheme() {
     var saved = localStorage.getItem('sv-theme');
-    if (saved === 'dark') {
+    if (saved === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+    } else {
         document.documentElement.setAttribute('data-theme', 'dark');
     }
 }
@@ -407,13 +409,15 @@ function navigateTo(page) {
     }
 
     var titles = {
-        dashboard: 'Dashboard',
+        dashboard: 'EduVault',
         browse: 'Browse Files',
         upload: 'Upload Files',
         manage: 'Manage Files',
         settings: 'Settings'
     };
-    document.getElementById('page-title').textContent = titles[page] || 'Dashboard';
+    var titleEl = document.getElementById('page-title');
+    var icon = '<svg class="topbar-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M8 7h6"/><path d="M8 11h8"/></svg> ';
+    titleEl.innerHTML = icon + (titles[page] || 'EduVault');
 
     closeSidebar();
 
