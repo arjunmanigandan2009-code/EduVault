@@ -43,10 +43,14 @@ CREATE TABLE IF NOT EXISTS files (
     file_size BIGINT DEFAULT 0,
     file_path TEXT NOT NULL,
     download_url TEXT NOT NULL,
+    thumbnail_url TEXT DEFAULT '',
     uploaded_by UUID REFERENCES auth.users(id),
     uploader_name TEXT DEFAULT '',
     created_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- 2b. Add thumbnail column (run if table already exists)
+ALTER TABLE files ADD COLUMN IF NOT EXISTS thumbnail_url TEXT DEFAULT '';
 
 -- 3. Comments table
 CREATE TABLE IF NOT EXISTS comments (
