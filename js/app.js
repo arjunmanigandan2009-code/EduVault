@@ -13,7 +13,9 @@ var allFiles = [];
 var currentFilter = 'all';
 var currentSearch = '';
 var selectedFiles = [];
+var selectedThumbnail = null;
 var currentViewerFile = null;
+var appShown = false;
 
 var ADMIN_SECRET = 'eduvault2026';
 
@@ -88,10 +90,13 @@ async function showApp() {
     document.getElementById('auth-container').classList.add('hidden');
     document.getElementById('app-container').classList.remove('hidden');
     updateUserUI();
-    await loadFiles();
-    syncThemeToggle();
-    syncCompactToggle();
-    navigateTo('dashboard');
+    if (!appShown) {
+        await loadFiles();
+        syncThemeToggle();
+        syncCompactToggle();
+        navigateTo('dashboard');
+        appShown = true;
+    }
 }
 
 function showLogin() {
@@ -215,6 +220,29 @@ function setupEventListeners() {
 
     var uploadForm = document.getElementById('upload-form');
     if (uploadForm) uploadForm.addEventListener('submit', handleUpload);
+
+    var thumbnailPicker = document.getElementById('thumbnail-picker');
+    var thumbnailInput = document.getElementById('thumbnail-input');
+    if (thumbnailPicker && thumbnailInput) {
+        thumbnailPicker.addEventListener('click', function(e) {
+            if (e.target.closest('.thumb-remove')) return;
+            thumbnailInput.click();
+        });
+        thumbnailInput.addEventListener('change', function(e) {
+            var file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('Thumbnail must be under 5MB', 'error');
+                return;
+            }
+            selectedThumbnail = file;
+            var url = URL.createObjectURL(file);
+            var preview = document.getElementById('thumbnail-preview');
+            preview.innerHTML = '<img src="' + url + '" alt="thumbnail"><button type="button" class="thumb-remove" onclick="removeThumbnail(event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>';
+            preview.classList.add('has-thumb');
+            preview.style.position = 'relative';
+        });
+    }
 
     var fileInput = document.getElementById('file-input');
     if (fileInput) {
@@ -524,7 +552,9 @@ function createFileCard(file) {
     var isImage = file.file_type === 'image';
     var thumbContent = '';
 
-    if (isImage && file.download_url) {
+    if (file.thumbnail_url) {
+        thumbContent = '<img src="' + file.thumbnail_url + '" alt="' + escapeHtml(file.title) + '" loading="lazy">';
+    } else if (isImage && file.download_url) {
         thumbContent = '<img src="' + file.download_url + '" alt="' + escapeHtml(file.title) + '" loading="lazy">';
     } else {
         thumbContent = '<div class="file-type-icon ' + getFileClass(file.file_type) + '">' + getFileEmoji(file.file_type) + '</div>';
@@ -572,8 +602,16 @@ function addFilesToSelection(files) {
 function renderFilePreviews() {
     var container = document.getElementById('file-preview-list');
     container.innerHTML = selectedFiles.map(function(file, idx) {
+        var thumbHtml = '';
+        var isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(file.name);
+        if (isImage) {
+            var objectUrl = URL.createObjectURL(file);
+            thumbHtml = '<img src="' + objectUrl + '" class="file-preview-thumb" alt="preview">';
+        } else {
+            thumbHtml = '<div class="file-preview-icon ' + getFileClass(getFileType(file.name)) + '">' + getFileEmoji(getFileType(file.name)) + '</div>';
+        }
         return '<div class="file-preview-item">' +
-            '<div class="file-preview-icon ' + getFileClass(getFileType(file.name)) + '">' + getFileEmoji(getFileType(file.name)) + '</div>' +
+            thumbHtml +
             '<div class="file-preview-info">' +
             '<div class="file-preview-name">' + escapeHtml(file.name) + '</div>' +
             '<div class="file-preview-size">' + formatFileSize(file.size) + '</div>' +
@@ -587,6 +625,16 @@ function renderFilePreviews() {
 function removeFile(index) {
     selectedFiles.splice(index, 1);
     renderFilePreviews();
+}
+
+function removeThumbnail(e) {
+    e.stopPropagation();
+    selectedThumbnail = null;
+    var preview = document.getElementById('thumbnail-preview');
+    preview.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg><span>Add thumbnail</span>';
+    preview.classList.remove('has-thumb');
+    preview.style.position = '';
+    document.getElementById('thumbnail-input').value = '';
 }
 
 async function handleUpload(e) {
@@ -606,6 +654,20 @@ async function handleUpload(e) {
 
     btn.disabled = true;
     progressEl.classList.remove('hidden');
+
+    var thumbnailUrl = '';
+    if (selectedThumbnail) {
+        try {
+            var thumbPath = currentUser.uid + '/thumb_' + Date.now() + '_' + selectedThumbnail.name;
+            var thumbResult = await supabase.storage.from('files').upload(thumbPath, selectedThumbnail, { upsert: true });
+            if (!thumbResult.error) {
+                var thumbPublic = supabase.storage.from('files').getPublicUrl(thumbPath);
+                thumbnailUrl = thumbPublic.data.publicUrl;
+            }
+        } catch (err) {
+            console.warn('Thumbnail upload failed:', err);
+        }
+    }
 
     var total = selectedFiles.length;
     var completed = 0;
@@ -641,6 +703,7 @@ async function handleUpload(e) {
                 file_size: file.size,
                 file_path: filePath,
                 download_url: downloadURL,
+                thumbnail_url: thumbnailUrl,
                 uploaded_by: currentUser.uid,
                 uploader_name: currentUserData.name || currentUser.email
             };
@@ -660,10 +723,12 @@ async function handleUpload(e) {
     progressText.textContent = '100%';
 
     selectedFiles = [];
+    selectedThumbnail = null;
     document.getElementById('file-preview-list').innerHTML = '';
     document.getElementById('upload-title').value = '';
     document.getElementById('upload-desc').value = '';
     document.getElementById('upload-category').value = '';
+    removeThumbnail({ stopPropagation: function(){} });
 
     showToast(completed + ' file(s) uploaded successfully', 'success');
 
