@@ -370,9 +370,13 @@ function navigateTo(page) {
         item.classList.toggle('active', item.dataset.page === page);
     });
 
-    document.querySelectorAll('.page').forEach(function(p) { p.classList.add('hidden'); });
+    document.querySelectorAll('.page').forEach(function(p) { p.classList.add('hidden'); p.classList.remove('page-enter'); });
     var pageEl = document.getElementById('page-' + page);
-    if (pageEl) pageEl.classList.remove('hidden');
+    if (pageEl) {
+        pageEl.classList.remove('hidden');
+        void pageEl.offsetWidth;
+        pageEl.classList.add('page-enter');
+    }
 
     var titles = {
         dashboard: 'Dashboard',
