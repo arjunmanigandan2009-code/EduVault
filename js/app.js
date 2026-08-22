@@ -556,12 +556,14 @@ function createFileCard(file) {
     var isImage = file.file_type === 'image';
     var thumbContent = '';
 
+    var defaultThumb = 'https://dfrqsxncmdgattcaxakm.supabase.co/storage/v1/object/public/files/undefined/thumb_1787329078247_file_000000008654820b8c4e9f7db0d871fb.png';
+
     if (file.thumbnail_url) {
         thumbContent = '<img src="' + file.thumbnail_url + '" alt="' + escapeHtml(file.title) + '" loading="lazy">';
     } else if (isImage && file.download_url) {
         thumbContent = '<img src="' + file.download_url + '" alt="' + escapeHtml(file.title) + '" loading="lazy">';
     } else {
-        thumbContent = '<div class="file-type-icon ' + getFileClass(file.file_type) + '">' + getFileEmoji(file.file_type) + '</div>';
+        thumbContent = '<img src="' + defaultThumb + '" alt="' + escapeHtml(file.title) + '" loading="lazy">';
     }
 
     return '<div class="file-card" onclick="openFileViewer(\'' + file.id + '\')">' +
@@ -663,7 +665,7 @@ async function handleUpload(e) {
     if (selectedThumbnail) {
         try {
             var thumbPath = currentUser.uid + '/thumb_' + Date.now() + '_' + selectedThumbnail.name;
-            var thumbResult = await supabase.storage.from('files').upload(thumbPath, selectedThumbnail, { upsert: true });
+            var thumbResult = await supabase.storage.from('files').upload(thumbPath, selectedThumbnail, { upsert: true, contentType: selectedThumbnail.type });
             if (!thumbResult.error) {
                 var thumbPublic = supabase.storage.from('files').getPublicUrl(thumbPath);
                 thumbnailUrl = thumbPublic.data.publicUrl;
@@ -687,7 +689,7 @@ async function handleUpload(e) {
 
             var uploadResult = await supabase.storage
                 .from('files')
-                .upload(filePath, file, { upsert: true });
+                .upload(filePath, file, { upsert: true, contentType: file.type });
 
             if (uploadResult.error) throw uploadResult.error;
 
