@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EduVault</title>
+    <title>LumaLearn</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+    <link rel="icon" href="logo.png">
 </head>
 <body>
     <div class="live-bg">
@@ -72,9 +72,9 @@
         <div id="login-page" class="auth-page">
             <div class="auth-card">
                 <div class="auth-header">
-                    <div class="auth-logo">📚</div>
+                    <div class="auth-logo"><img src="logo.png" alt="LumaLearn"></div>
                     <h1>Welcome Back</h1>
-                    <p>Sign in to EduVault</p>
+                    <p>Sign in to LumaLearn</p>
                 </div>
                 <form id="login-form" class="auth-form">
                     <div class="form-group">
@@ -111,9 +111,9 @@
         <div id="register-page" class="auth-page hidden">
             <div class="auth-card">
                 <div class="auth-header">
-                    <div class="auth-logo">📚</div>
+                    <div class="auth-logo"><img src="logo.png" alt="LumaLearn"></div>
                     <h1>Create Account</h1>
-                    <p>Join EduVault today</p>
+                    <p>Join LumaLearn today</p>
                 </div>
                 <form id="register-form" class="auth-form">
                     <div class="form-group">
@@ -176,8 +176,8 @@
         <aside id="sidebar" class="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-logo">
-                    <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M8 7h6"/><path d="M8 11h8"/></svg>
-                    <span class="logo-text">EduVault</span>
+                    <img src="logo.png" class="logo-icon" alt="LumaLearn">
+                    <span class="logo-text">LumaLearn</span>
                 </div>
                 <button class="sidebar-close" onclick="toggleSidebar()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
@@ -191,10 +191,6 @@
                 <a href="#" class="nav-item" data-page="browse" onclick="navigateTo('browse')">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
                     <span>Browse Files</span>
-                </a>
-                <a href="#" class="nav-item" data-page="chat" onclick="navigateTo('chat')">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                    <span>Chat</span>
                 </a>
                 <a href="#" class="nav-item nav-admin hidden" data-page="upload" onclick="navigateTo('upload')">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
@@ -226,20 +222,23 @@
         <!-- Sidebar Overlay -->
         <div id="sidebar-overlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
+        <!-- Floating Chat Button (mobile) -->
+        <button class="chat-fab" onclick="toggleChat()" title="Chat" aria-label="Open chat">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>Chat</span>
+        </button>
+
         <!-- Main Content -->
         <main class="main-content">
             <!-- Top Bar -->
             <header class="topbar">
-                <button class="topbar-menu" onclick="toggleSidebar()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
-                </button>
                 <h2 class="topbar-title" id="page-title">
-                    <svg class="topbar-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M8 7h6"/><path d="M8 11h8"/></svg>
-                    EduVault
+                    <img src="logo.png" class="topbar-logo" alt="LumaLearn">
+                    LumaLearn
                 </h2>
                 <div class="topbar-actions">
-                    <button class="btn-icon" onclick="navigateTo('settings')" title="Settings">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <button class="topbar-menu" onclick="toggleSidebar()" title="Menu">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
                     </button>
                 </div>
             </header>
@@ -420,7 +419,7 @@
                 <div id="page-chat" class="page hidden">
                     <div class="page-header">
                         <h1>Community Chat</h1>
-                        <p>Chat freely with everyone using EduVault</p>
+                        <p>Chat freely with everyone using LumaLearn</p>
                     </div>
                     <div class="chat-container">
                         <div class="chat-messages" id="chat-messages">

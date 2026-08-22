@@ -1,5 +1,5 @@
 -- ============================================
--- EduVault - Supabase Database Setup
+-- LumaLearn - Supabase Database Setup
 -- Run this in: Supabase Dashboard > SQL Editor
 -- ============================================
 
