@@ -116,12 +116,43 @@ CREATE POLICY "Authenticated users can delete comments"
     TO authenticated
     USING (true);
 
+-- 7. Chat messages table (community/common chat for all users)
+CREATE TABLE IF NOT EXISTS chat_messages (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    text TEXT NOT NULL,
+    author_id UUID REFERENCES auth.users(id),
+    author_name TEXT DEFAULT '',
+    is_admin BOOLEAN DEFAULT false,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 7b. Enable RLS for chat
+ALTER TABLE chat_messages ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Authenticated users can view chat"
+    ON chat_messages FOR SELECT
+    TO authenticated
+    USING (true);
+
+CREATE POLICY "Authenticated users can insert chat"
+    ON chat_messages FOR INSERT
+    TO authenticated
+    WITH CHECK (true);
+
+CREATE POLICY "Authenticated users can delete chat"
+    ON chat_messages FOR DELETE
+    TO authenticated
+    USING (true);
+
 -- 6. Storage bucket
 -- Run this AFTER the SQL above, or create via Dashboard > Storage > New Bucket
 -- Bucket name: "files" (set Public: ON)
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('files', 'files', true)
+INSERT INTO storage.buckets (id, name, public, file_size_limit)
+VALUES ('files', 'files', true, 52428800)
 ON CONFLICT (id) DO NOTHING;
+
+-- Update file size limit for existing bucket (run if bucket already exists)
+UPDATE storage.buckets SET file_size_limit = 52428800 WHERE id = 'files';
 
 -- Storage policies
 CREATE POLICY "Authenticated users can upload files"

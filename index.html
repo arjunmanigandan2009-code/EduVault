@@ -192,6 +192,10 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
                     <span>Browse Files</span>
                 </a>
+                <a href="#" class="nav-item" data-page="chat" onclick="navigateTo('chat')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <span>Chat</span>
+                </a>
                 <a href="#" class="nav-item nav-admin hidden" data-page="upload" onclick="navigateTo('upload')">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
                     <span>Upload</span>
@@ -408,6 +412,28 @@
                         <div class="empty-state">
                             <div class="empty-icon">📂</div>
                             <h3>No files to manage</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Page -->
+                <div id="page-chat" class="page hidden">
+                    <div class="page-header">
+                        <h1>Community Chat</h1>
+                        <p>Chat freely with everyone using EduVault</p>
+                    </div>
+                    <div class="chat-container">
+                        <div class="chat-messages" id="chat-messages">
+                            <div class="chat-empty">No messages yet. Start the conversation!</div>
+                        </div>
+                        <div class="chat-input-area" id="chat-input-area">
+                            <div class="chat-input-label" id="chat-input-label">Chatting as: User</div>
+                            <form id="chat-form" class="chat-input-wrapper">
+                                <textarea id="chat-input" placeholder="Type your message here..." rows="2" required></textarea>
+                                <button type="submit" class="btn-icon chat-send" title="Send">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
