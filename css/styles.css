@@ -451,8 +451,18 @@ img, video { max-width: 100%; display: block; }
 }
 
 .auth-logo {
-    font-size: 48px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     margin-bottom: 12px;
+}
+
+.auth-logo img {
+    width: 84px;
+    height: 84px;
+    object-fit: contain;
+    border-radius: 12px;
+    filter: drop-shadow(0 0 10px var(--accent-glow));
 }
 
 .auth-header h1 {
@@ -724,6 +734,8 @@ img, video { max-width: 100%; display: block; }
 .logo-icon {
     width: 28px;
     height: 28px;
+    object-fit: contain;
+    border-radius: 6px;
     stroke: var(--accent);
     filter: drop-shadow(0 0 6px rgba(255, 199, 44, 0.7)) drop-shadow(0 0 14px rgba(255, 199, 44, 0.4));
     animation: logoGlow 3s ease-in-out infinite alternate;
@@ -930,6 +942,8 @@ img, video { max-width: 100%; display: block; }
 .topbar-logo {
     width: 22px;
     height: 22px;
+    object-fit: contain;
+    border-radius: 5px;
     stroke: var(--accent);
     filter: drop-shadow(0 0 6px rgba(255, 199, 44, 0.7)) drop-shadow(0 0 14px rgba(255, 199, 44, 0.4));
     animation: logoGlow 3s ease-in-out infinite alternate;
@@ -2453,3 +2467,33 @@ body.compact .setting-item { padding: 12px; }
 .chat-send:hover { transform: scale(1.1); box-shadow: 0 2px 12px var(--accent-glow); }
 .chat-send:active { transform: scale(0.9); }
 .chat-send svg { width: 18px; height: 18px; }
+
+/* Floating chat button (mobile only) */
+.chat-fab {
+    position: fixed;
+    bottom: 22px;
+    left: 22px;
+    height: 52px;
+    padding: 0 22px;
+    border-radius: 28px;
+    background: var(--accent);
+    color: #0C2340;
+    border: none;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    box-shadow: 0 4px 18px var(--accent-glow), 0 0 22px var(--accent-glow);
+    z-index: 150;
+    transition: transform 0.3s var(--ease-smooth), box-shadow 0.3s var(--ease-smooth);
+}
+
+.chat-fab:hover { transform: scale(1.05); box-shadow: 0 6px 26px var(--accent-glow), 0 0 30px var(--accent-glow); }
+.chat-fab:active { transform: scale(0.96); }
+.chat-fab svg { width: 22px; height: 22px; stroke: #0C2340; }
+
+@media (max-width: 768px) {
+    .chat-fab { display: flex; }
+}
