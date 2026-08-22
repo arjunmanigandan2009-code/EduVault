@@ -16,6 +16,8 @@ var selectedFiles = [];
 var selectedThumbnail = null;
 var currentViewerFile = null;
 var appShown = false;
+var chatInterval = null;
+var chatKnownIds = {};
 
 var ADMIN_SECRET = 'eduvault2026';
 
@@ -274,6 +276,9 @@ function setupEventListeners() {
 
     var commentForm = document.getElementById('comment-form');
     if (commentForm) commentForm.addEventListener('submit', handleCommentSubmit);
+
+    var chatForm = document.getElementById('chat-form');
+    if (chatForm) chatForm.addEventListener('submit', sendChatMessage);
 }
 
 async function loadUserData() {
@@ -413,6 +418,7 @@ function navigateTo(page) {
         browse: 'Browse Files',
         upload: 'Upload Files',
         manage: 'Manage Files',
+        chat: 'Community Chat',
         settings: 'Settings'
     };
     var titleEl = document.getElementById('page-title');
@@ -421,9 +427,12 @@ function navigateTo(page) {
 
     closeSidebar();
 
+    if (chatInterval) { clearInterval(chatInterval); chatInterval = null; }
+
     if (page === 'dashboard') loadDashboard();
     if (page === 'browse') renderBrowseFiles();
     if (page === 'manage') renderManageFiles();
+    if (page === 'chat') loadChat();
 }
 
 function toggleSidebar() {
@@ -988,6 +997,129 @@ async function deleteComment(fileId, commentId) {
         await loadComments(fileId);
     } catch (err) {
         showToast('Error deleting comment', 'error');
+    }
+}
+
+// ===== Chat (Community) =====
+async function loadChat() {
+    if (!currentUser) return;
+
+    var name = (currentUserData && currentUserData.name) || currentUser.email.split('@')[0];
+    var label = document.getElementById('chat-input-label');
+    label.innerHTML = 'Chatting as: <strong>' + escapeHtml(name) + '</strong>';
+
+    chatKnownIds = {};
+    await refreshChatMessages();
+
+    if (chatInterval) clearInterval(chatInterval);
+    chatInterval = setInterval(refreshChatMessages, 4000);
+}
+
+async function refreshChatMessages() {
+    var container = document.getElementById('chat-messages');
+    if (!container) return;
+    try {
+        var result = await dbSelect('chat_messages', null, 'created_at', true);
+        if (result.error) throw result.error;
+        var messages = result.data || [];
+
+        // First render (fresh entry)
+        if (Object.keys(chatKnownIds).length === 0) {
+            renderChatMessages(messages, container);
+            return;
+        }
+
+        // Only append messages we haven't shown yet
+        var wasAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 40;
+        var newOnes = messages.filter(function(m) { return !chatKnownIds[m.id]; });
+        if (newOnes.length === 0) return;
+
+        var emptyEl = container.querySelector('.chat-empty');
+        if (emptyEl && emptyEl.parentNode) emptyEl.parentNode.removeChild(emptyEl);
+
+        var frag = document.createElement('div');
+        frag.innerHTML = newOnes.map(chatMsgHtml).join('');
+        while (frag.firstChild) container.appendChild(frag.firstChild);
+        newOnes.forEach(function(m) { chatKnownIds[m.id] = true; });
+
+        if (wasAtBottom) container.scrollTop = container.scrollHeight;
+    } catch (err) {
+        console.error('Error loading chat:', err);
+    }
+}
+
+function chatMsgHtml(msg) {
+    var isMe = currentUser && msg.author_id === currentUser.uid;
+    var isAdminMsg = msg.is_admin;
+    var initial = (msg.author_name || 'U').charAt(0).toUpperCase();
+    var canDelete = isAdmin() || isMe;
+    var deleteBtn = canDelete ?
+        '<button class="chat-msg-delete" onclick="deleteChatMessage(\'' + msg.id + '\')" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>' : '';
+
+    return '<div class="chat-msg ' + (isAdminMsg ? 'chat-msg-admin' : '') + '" data-id="' + msg.id + '">' +
+        '<div class="chat-msg-avatar">' + escapeHtml(initial) + '</div>' +
+        '<div class="chat-msg-body">' +
+            '<div class="chat-msg-header">' +
+                '<span class="chat-msg-author">' + escapeHtml(msg.author_name || 'Unknown') + '</span>' +
+                (isAdminMsg ? '<span class="chat-admin-tag">Admin</span>' : '') +
+                '<span class="chat-msg-time">' + formatDate(msg.created_at) + '</span>' +
+            '</div>' +
+            '<div class="chat-msg-text">' + escapeHtml(msg.text) + '</div>' +
+        '</div>' + deleteBtn +
+    '</div>';
+}
+
+function renderChatMessages(messages, container) {
+    chatKnownIds = {};
+    if (!messages || messages.length === 0) {
+        container.innerHTML = '<div class="chat-empty">No messages yet. Start the conversation!</div>';
+        return;
+    }
+
+    container.innerHTML = messages.map(chatMsgHtml).join('');
+    messages.forEach(function(m) { chatKnownIds[m.id] = true; });
+    container.scrollTop = container.scrollHeight;
+}
+
+async function sendChatMessage(e) {
+    e.preventDefault();
+    if (!currentUser) return;
+
+    var input = document.getElementById('chat-input');
+    var text = input.value.trim();
+    if (!text) return;
+
+    input.value = '';
+
+    try {
+        var result = await dbInsert('chat_messages', {
+            text: text,
+            author_id: currentUser.uid,
+            author_name: (currentUserData && currentUserData.name) || currentUser.email,
+            is_admin: isAdmin()
+        });
+        if (result.error) throw result.error;
+        await refreshChatMessages();
+    } catch (err) {
+        showToast('Error sending message', 'error');
+    }
+}
+
+async function deleteChatMessage(id) {
+    try {
+        var result = await dbDelete('chat_messages', [{ col: 'id', val: id }]);
+        if (result.error) throw result.error;
+
+        var node = document.querySelector('.chat-msg[data-id="' + id + '"]');
+        if (node && node.parentNode) node.parentNode.removeChild(node);
+        delete chatKnownIds[id];
+
+        var container = document.getElementById('chat-messages');
+        if (container && !container.querySelector('.chat-msg')) {
+            container.innerHTML = '<div class="chat-empty">No messages yet. Start the conversation!</div>';
+        }
+    } catch (err) {
+        showToast('Error deleting message', 'error');
     }
 }
 
