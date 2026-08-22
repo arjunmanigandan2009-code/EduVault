@@ -438,11 +438,20 @@ function navigateTo(page) {
 function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('open');
     document.getElementById('sidebar-overlay').classList.toggle('active');
+    updateFabVisibility();
 }
 
 function closeSidebar() {
     document.getElementById('sidebar').classList.remove('open');
     document.getElementById('sidebar-overlay').classList.remove('active');
+    updateFabVisibility();
+}
+
+function updateFabVisibility() {
+    var fab = document.querySelector('.chat-fab');
+    if (!fab) return;
+    var sidebarOpen = document.getElementById('sidebar').classList.contains('open');
+    fab.classList.toggle('visible', !sidebarOpen);
 }
 
 // ===== File Management =====
