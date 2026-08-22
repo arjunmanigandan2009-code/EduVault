@@ -414,7 +414,7 @@ function navigateTo(page) {
     }
 
     var titles = {
-        dashboard: 'EduVault',
+        dashboard: 'LumaLearn',
         browse: 'Browse Files',
         upload: 'Upload Files',
         manage: 'Manage Files',
@@ -422,8 +422,8 @@ function navigateTo(page) {
         settings: 'Settings'
     };
     var titleEl = document.getElementById('page-title');
-    var icon = '<svg class="topbar-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M8 7h6"/><path d="M8 11h8"/></svg> ';
-    titleEl.innerHTML = icon + (titles[page] || 'EduVault');
+    var icon = '<img src="logo.png" class="topbar-logo" alt="LumaLearn"> ';
+    titleEl.innerHTML = icon + (titles[page] || 'LumaLearn');
 
     closeSidebar();
 
@@ -1001,6 +1001,15 @@ async function deleteComment(fileId, commentId) {
 }
 
 // ===== Chat (Community) =====
+function toggleChat() {
+    var chatPage = document.getElementById('page-chat');
+    if (chatPage && !chatPage.classList.contains('hidden')) {
+        navigateTo('dashboard');
+    } else {
+        navigateTo('chat');
+    }
+}
+
 async function loadChat() {
     if (!currentUser) return;
 
