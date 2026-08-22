@@ -1052,5 +1052,5 @@ function showToast(message, type) {
         toast.style.opacity = '0';
         toast.style.transform = 'translateX(100px)';
         setTimeout(function() { toast.remove(); }, 300);
-    }, 3500);
+    }, 5000);
 }
