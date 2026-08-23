@@ -913,6 +913,19 @@ img, video { max-width: 100%; display: block; }
     transition: background 0.5s var(--ease-smooth), border-color 0.5s var(--ease-smooth);
 }
 
+.topbar-bell {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 8px;
+    transition: all 1s ease;
+}
+.topbar-bell:hover { background: var(--bg-hover); transform: scale(1.05); }
+.topbar-bell:active { transform: scale(0.92); }
+.topbar-bell svg { width: 22px; height: 22px; }
+
 .topbar-menu {
     display: none;
     background: none;
@@ -2119,7 +2132,7 @@ img, video { max-width: 100%; display: block; }
         margin-left: 0;
     }
 
-    .topbar-menu {
+.topbar-menu {
         display: flex;
     }
 
