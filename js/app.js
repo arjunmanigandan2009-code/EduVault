@@ -18,6 +18,8 @@ var currentViewerFile = null;
 var appShown = false;
 var chatInterval = null;
 var chatKnownIds = {};
+var filePollInterval = null;
+var knownFileIds = {};
 
 var ADMIN_SECRET = 'eduvault2026';
 
@@ -36,6 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             currentUser = null;
             currentUserData = null;
+            stopFilePolling();
             showAuth();
         }
     });
@@ -84,6 +87,71 @@ function syncCompactToggle() {
     if (toggle) toggle.checked = document.body.classList.contains('compact');
 }
 
+// ===== Push Notifications =====
+function requestNotificationPermission() {
+    if (!('Notification' in window)) return;
+    if (Notification.permission === 'default') {
+        Notification.requestPermission();
+    }
+}
+
+function showPushNotification(title, body, icon) {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    try {
+        new Notification(title, { body: body, icon: icon || 'logo.png', badge: 'logo.png', tag: 'lumalearn-' + Date.now() });
+    } catch (e) {}
+}
+
+function startFilePolling() {
+    trackKnownFiles();
+    filePollInterval = setInterval(pollForNewFiles, 15000);
+}
+
+function stopFilePolling() {
+    if (filePollInterval) { clearInterval(filePollInterval); filePollInterval = null; }
+}
+
+function trackKnownFiles() {
+    knownFileIds = {};
+    allFiles.forEach(function(f) { knownFileIds[f.id] = true; });
+}
+
+async function pollForNewFiles() {
+    try {
+        var result = await dbSelect('files', null, 'created_at', false);
+        if (result.error) throw result.error;
+        var freshFiles = (result.data || []);
+        var newFiles = freshFiles.filter(function(f) { return !knownFileIds[f.id]; });
+        if (newFiles.length > 0) {
+            newFiles.forEach(function(f) {
+                var ext = (f.file_name || '').split('.').pop().toLowerCase();
+                var typeLabel = ext === 'pdf' ? 'PDF' : (['jpg','jpeg','png','gif','webp','svg'].indexOf(ext) > -1 ? 'Image' : (['mp4','webm','mov','avi'].indexOf(ext) > -1 ? 'Video' : 'Document'));
+                showPushNotification('New ' + typeLabel + ' Uploaded', '"' + (f.title || f.file_name) + '" by ' + (f.uploader_name || 'Admin'), 'logo.png');
+                showToast('New file: ' + (f.title || f.file_name), 'info');
+            });
+            allFiles = freshFiles.map(function(f) {
+                f.id = f.id;
+                f.title = f.title;
+                f.description = f.description;
+                f.category = f.category;
+                f.file_name = f.file_name;
+                f.file_type = f.file_type;
+                f.file_size = f.file_size;
+                f.file_path = f.file_path;
+                f.download_url = f.download_url;
+                f.uploaded_by = f.uploaded_by;
+                f.uploader_name = f.uploader_name;
+                f.created_at = f.created_at;
+                return f;
+            });
+            trackKnownFiles();
+            if (document.getElementById('page-dashboard') && !document.getElementById('page-dashboard').classList.contains('hidden')) {
+                loadDashboard();
+            }
+        }
+    } catch (e) {}
+}
+
 // ===== Authentication =====
 function showAuth() {
     document.getElementById('auth-container').classList.remove('hidden');
@@ -101,6 +169,8 @@ async function showApp() {
         navigateTo('dashboard');
         appShown = true;
     }
+    requestNotificationPermission();
+    startFilePolling();
 }
 
 function showLogin() {
